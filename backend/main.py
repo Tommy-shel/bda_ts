@@ -24,16 +24,16 @@ PARAMS_PATH = os.path.join(BASE_DIR, "apps", "spark_model_params.json")
 
 # Standard English stop words matching Spark's StopWordsRemover
 STOP_WORDS = set([
-    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are",
-    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but",
-    "by", "could", "did", "do", "does", "doing", "down", "during", "each", "few", "for", "from",
-    "further", "had", "has", "have", "having", "he", "her", "here", "hers", "herself", "him",
-    "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me",
-    "more", "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only",
-    "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she",
-    "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves",
-    "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until",
-    "up", "very", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom",
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", 
+    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", 
+    "by", "could", "did", "do", "does", "doing", "down", "during", "each", "few", "for", "from", 
+    "further", "had", "has", "have", "having", "he", "her", "here", "hers", "herself", "him", 
+    "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me", 
+    "more", "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only", 
+    "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she", 
+    "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves", 
+    "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", 
+    "up", "very", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", 
     "why", "with", "would", "you", "your", "yours", "yourself", "yourselves"
 ])
 
@@ -54,21 +54,68 @@ class NewsInput(BaseModel):
     title: str
     text: str
 
+# Pure Python MurmurHash3_x86_32 implementation matching Spark's HashingTF
+def murmur3_32(key: str, seed: int = 42) -> int:
+    data = key.encode('utf-8')
+    length = len(data)
+    nblocks = length // 4
+    h1 = seed
+    c1 = 0xcc9e2d51
+    c2 = 0x1b873593
+
+    # body
+    for block_start in range(0, nblocks * 4, 4):
+        k1 = data[block_start] | (data[block_start+1] << 8) | (data[block_start+2] << 16) | (data[block_start+3] << 24)
+        k1 = (k1 * c1) & 0xFFFFFFFF
+        k1 = ((k1 << 15) | (k1 >> 17)) & 0xFFFFFFFF
+        k1 = (k1 * c2) & 0xFFFFFFFF
+
+        h1 ^= k1
+        h1 = ((h1 << 13) | (h1 >> 19)) & 0xFFFFFFFF
+        h1 = (h1 * 5 + 0xe6546b64) & 0xFFFFFFFF
+
+    # tail
+    tail_index = nblocks * 4
+    k1 = 0
+    tail_size = length & 3
+    if tail_size >= 3:
+        k1 ^= data[tail_index + 2] << 16
+    if tail_size >= 2:
+        k1 ^= data[tail_index + 1] << 8
+    if tail_size >= 1:
+        k1 ^= data[tail_index]
+        k1 = (k1 * c1) & 0xFFFFFFFF
+        k1 = ((k1 << 15) | (k1 >> 17)) & 0xFFFFFFFF
+        k1 = (k1 * c2) & 0xFFFFFFFF
+        h1 ^= k1
+
+    # finalization
+    h1 ^= length
+    h1 ^= (h1 >> 16)
+    h1 = (h1 * 0x85ebca6b) & 0xFFFFFFFF
+    h1 ^= (h1 >> 13)
+    h1 = (h1 * 0xc2b2ae35) & 0xFFFFFFFF
+    h1 ^= (h1 >> 16)
+
+    # Convert to signed 32-bit int
+    if h1 & 0x80000000:
+        h1 = -((~h1 + 1) & 0xFFFFFFFF)
+    return h1
+
 def predict_with_spark_weights(text: str):
     # 1. Clean and tokenize text
     cleaned = re.sub(r'[^a-zA-Z\s]', '', text.lower())
     words = [w for w in cleaned.split() if w and w not in STOP_WORDS]
-
+    
     num_features = model_params["num_features"]
     coefficients = model_params["coefficients"]
     idf_weights = model_params["idf_weights"]
     intercept = model_params["intercept"]
-
-    # 2. HashingTF (Hash words into feature buckets)
+    
+    # 2. HashingTF (Hash words into feature buckets using Murmur3 to match Spark)
     feature_counts = {}
     for word in words:
-        # Murmur/CRC hash simulation to match Spark feature indices
-        idx = abs(zlib.crc32(word.encode('utf-8'))) % num_features
+        idx = murmur3_32(word, seed=42) % num_features
         feature_counts[idx] = feature_counts.get(idx, 0) + 1
 
     # 3. Compute Dot Product (Weights * Features * IDF) + Intercept
@@ -82,7 +129,7 @@ def predict_with_spark_weights(text: str):
     # Bound score to avoid overflow
     raw_score = max(-500.0, min(500.0, raw_score))
     prob_fake = 1.0 / (1.0 + math.exp(-raw_score))
-
+    
     if prob_fake >= 0.5:
         return "FAKE", prob_fake
     else:
@@ -91,7 +138,7 @@ def predict_with_spark_weights(text: str):
 @app.get("/")
 def read_root():
     return {
-        "status": "Online",
+        "status": "Online", 
         "engine": "PySpark MLlib",
         "model_loaded": model_params is not None
     }

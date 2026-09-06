@@ -15,16 +15,19 @@ spark.sparkContext.setLogLevel("WARN")
 
 # Robust paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-raw_path = os.path.join(BASE_DIR, "data", "raw", "sample_news.csv")
+raw_folder = os.path.join(BASE_DIR, "data", "raw")
 processed_path = os.path.join(BASE_DIR, "data", "processed", "cleaned_news.parquet")
 
 print("\n--- [Phase 7] Data Cleaning ---")
-if not os.path.exists(raw_path):
-    print(f"⚠️ Error: Raw dataset not found at {raw_path}")
+if not os.path.exists(raw_folder):
+    print(f"⚠️ Error: Raw folder not found at {raw_folder}")
     spark.stop()
     exit()
 
-df = spark.read.csv(raw_path, header=True, inferSchema=True)
+csv_wildcard = os.path.join(raw_folder, "*.csv")
+print(f"Loading and combining all datasets from {csv_wildcard}...")
+df = spark.read.csv(csv_wildcard, header=True, inferSchema=True)
+print(f"Total raw records loaded: {df.count()}")
 
 # Remove nulls
 df = df.na.drop()
