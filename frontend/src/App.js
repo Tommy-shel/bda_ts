@@ -19,13 +19,13 @@ function App() {
       alert("Please enter both an article headline and content.");
       return;
     }
-    
+
     setLoading(true);
     setErrorMsg("");
     setResult(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/predict", {
+      const response = await fetch("https://bda-ts.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, text })
@@ -83,41 +83,41 @@ function App() {
               Live Detection
             </h2>
             <div className="space-x-2">
-              <button 
-                onClick={() => loadSample('fake')} 
+              <button
+                onClick={() => loadSample('fake')}
                 className="text-xs bg-red-100 text-red-700 font-semibold px-2 py-1 rounded hover:bg-red-200 transition"
               >
                 + Sample Fake
               </button>
-              <button 
-                onClick={() => loadSample('real')} 
+              <button
+                onClick={() => loadSample('real')}
                 className="text-xs bg-green-100 text-green-700 font-semibold px-2 py-1 rounded hover:bg-green-200 transition"
               >
                 + Sample Real
               </button>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Headline</label>
-              <input 
+              <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" 
-                placeholder="e.g. Secret document leaks online..." 
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition"
+                placeholder="e.g. Secret document leaks online..."
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Article Content</label>
-              <textarea 
+              <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl h-36 focus:ring-2 focus:ring-blue-500 outline-none transition" 
-                placeholder="Paste news content here..." 
+                className="w-full p-3 border border-gray-300 rounded-xl h-36 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                placeholder="Paste news content here..."
               />
             </div>
-            <button 
+            <button
               onClick={handlePredict}
               disabled={loading}
               className={`w-full py-4 rounded-xl font-bold text-white transition transform active:scale-95 ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-blue-200'}`}
