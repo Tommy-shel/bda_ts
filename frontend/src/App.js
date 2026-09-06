@@ -25,7 +25,7 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch("https://bda-ts.onrender.com", {
+      const response = await fetch("https://bda-ts.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, text })
