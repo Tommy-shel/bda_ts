@@ -242,9 +242,9 @@ function App() {
         <div className="flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
           <p>© 2024 Fake News Detection System. Powered by Apache Spark & Big Data Analytics.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-blue-600 transition">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-600 transition">Terms of Service</a>
-            <a href="#" className="hover:text-blue-600 transition">Contact Us</a>
+            <a href="/" className="hover:text-blue-600 transition">Privacy Policy</a>
+            <a href="/" className="hover:text-blue-600 transition">Terms of Service</a>
+            <a href="/" className="hover:text-blue-600 transition">Contact Us</a>
           </div>
         </div>
       </footer>
