@@ -1,5 +1,5 @@
 {
-  "name": "fake-news-bda-frontend",
+  "name": "bda-ts",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -16,18 +16,6 @@
   "eslintConfig": {
     "extends": [
       "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
     ]
   }
 }
