@@ -1,0 +1,14 @@
+version: '3'
+services:
+  spark-hadoop:
+    image: bitnami/spark:3.3.1
+    container_name: bda-spark-cluster
+    ports:
+      - "8080:8080" # Spark UI
+    volumes:
+      - ../data:/opt/bitnami/spark/data
+      - ../apps:/opt/bitnami/spark/apps
+    environment:
+      - SPARK_MODE=master
+    stdin_open: true
+    tty: true
