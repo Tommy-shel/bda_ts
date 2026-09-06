@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -23,16 +24,16 @@ PARAMS_PATH = os.path.join(BASE_DIR, "apps", "spark_model_params.json")
 
 # Standard English stop words matching Spark's StopWordsRemover
 STOP_WORDS = set([
-    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", 
-    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", 
-    "by", "could", "did", "do", "does", "doing", "down", "during", "each", "few", "for", "from", 
-    "further", "had", "has", "have", "having", "he", "her", "here", "hers", "herself", "him", 
-    "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me", 
-    "more", "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only", 
-    "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she", 
-    "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves", 
-    "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", 
-    "up", "very", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", 
+    "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are",
+    "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but",
+    "by", "could", "did", "do", "does", "doing", "down", "during", "each", "few", "for", "from",
+    "further", "had", "has", "have", "having", "he", "her", "here", "hers", "herself", "him",
+    "himself", "his", "how", "i", "if", "in", "into", "is", "it", "its", "itself", "just", "me",
+    "more", "most", "my", "myself", "no", "nor", "not", "now", "of", "off", "on", "once", "only",
+    "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she",
+    "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves",
+    "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until",
+    "up", "very", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom",
     "why", "with", "would", "you", "your", "yours", "yourself", "yourselves"
 ])
 
@@ -57,12 +58,12 @@ def predict_with_spark_weights(text: str):
     # 1. Clean and tokenize text
     cleaned = re.sub(r'[^a-zA-Z\s]', '', text.lower())
     words = [w for w in cleaned.split() if w and w not in STOP_WORDS]
-    
+
     num_features = model_params["num_features"]
     coefficients = model_params["coefficients"]
     idf_weights = model_params["idf_weights"]
     intercept = model_params["intercept"]
-    
+
     # 2. HashingTF (Hash words into feature buckets)
     feature_counts = {}
     for word in words:
@@ -81,7 +82,7 @@ def predict_with_spark_weights(text: str):
     # Bound score to avoid overflow
     raw_score = max(-500.0, min(500.0, raw_score))
     prob_fake = 1.0 / (1.0 + math.exp(-raw_score))
-    
+
     if prob_fake >= 0.5:
         return "FAKE", prob_fake
     else:
@@ -90,7 +91,7 @@ def predict_with_spark_weights(text: str):
 @app.get("/")
 def read_root():
     return {
-        "status": "Online", 
+        "status": "Online",
         "engine": "PySpark MLlib",
         "model_loaded": model_params is not None
     }
@@ -114,5 +115,5 @@ async def predict_news(news: NewsInput):
     }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
