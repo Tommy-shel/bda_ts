@@ -381,9 +381,9 @@ function App() {
             <p className="text-gray-400 text-sm">Powered by Apache Spark, Kafka & Big Data Analytics.</p>
           </div>
           <div className="flex space-x-8 text-sm font-bold text-gray-300">
-            <a href="#" className="hover:text-blue-400 transition">Privacy Policy</a>
-            <a href="#" className="hover:text-blue-400 transition">API Documentation</a>
-            <a href="#" className="hover:text-blue-400 transition">Contact Us</a>
+            <a href="/" className="hover:text-blue-400 transition">Privacy Policy</a>
+            <a href="/" className="hover:text-blue-400 transition">API Documentation</a>
+            <a href="/" className="hover:text-blue-400 transition">Contact Us</a>
           </div>
         </div>
         <div className="text-center mt-6 text-gray-400 text-sm font-medium">
