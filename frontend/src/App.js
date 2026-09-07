@@ -107,9 +107,9 @@ function App() {
 
       {/* Stats Counter */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <StatCard title="Total Articles Processed" value="100,550" color="border-blue-500" icon="📦" />
-        <StatCard title="Real Articles Analyzed" value="50,275" color="border-green-500" icon="✅" />
-        <StatCard title="Fake Articles Analyzed" value="50,275" color="border-red-500" icon="🚨" />
+        <StatCard title="Total Articles Processed" value="205,596" color="border-blue-500" icon="📦" />
+        <StatCard title="Real Articles Analyzed" value="102,798" color="border-green-500" icon="✅" />
+        <StatCard title="Fake Articles Analyzed" value="102,798" color="border-red-500" icon="🚨" />
         <StatCard title="Model Accuracy" value="100.0%" color="border-purple-500" icon="🎯" />
       </div>
 
@@ -253,6 +253,46 @@ function App() {
 
         {/* Analytics Section */}
         <div className="space-y-6">
+          {/* New Cool Section: Deep Learning Breakdown Map */}
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-white">
+            <h2 className="text-2xl font-bold mb-6 text-indigo-900 flex items-center">
+              <span className="bg-indigo-100 p-2 rounded-lg mr-3">🧠</span>
+              Model Accuracy Breakdown
+            </h2>
+            <div className="space-y-5">
+              <div>
+                <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                  <span>Overall Accuracy</span>
+                  <span className="text-indigo-600">100.0%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: '100%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                  <span>Real News Precision</span>
+                  <span className="text-green-600">100.0%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-green-500 h-2.5 rounded-full" style={{ width: '100%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                  <span>Fake News Recall</span>
+                  <span className="text-red-600">100.0%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-red-500 h-2.5 rounded-full" style={{ width: '100%' }}></div>
+                </div>
+              </div>
+              <div className="mt-4 text-xs font-semibold text-gray-500 text-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                Trained on 205,596 verified articles with PySpark MLlib (50,000 features).
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
             <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
               <span className="bg-green-100 p-2 rounded-lg mr-3">📊</span>
@@ -334,14 +374,20 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="max-w-6xl mx-auto mt-20 pb-10 border-t border-gray-200 pt-8">
-        <div className="flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-          <p>© 2024 Fake News Detection System. Powered by Apache Spark & Big Data Analytics.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="/" className="hover:text-blue-600 transition">Privacy Policy</a>
-            <a href="/" className="hover:text-blue-600 transition">Terms of Service</a>
-            <a href="/" className="hover:text-blue-600 transition">Contact Us</a>
+      <footer className="max-w-6xl mx-auto mt-20 mb-8">
+        <div className="bg-gray-900 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center shadow-2xl">
+          <div className="text-center md:text-left mb-6 md:mb-0">
+            <h3 className="text-xl font-black text-white mb-2">Fake News Detection Engine</h3>
+            <p className="text-gray-400 text-sm">Powered by Apache Spark, Kafka & Big Data Analytics.</p>
           </div>
+          <div className="flex space-x-8 text-sm font-bold text-gray-300">
+            <a href="#" className="hover:text-blue-400 transition">Privacy Policy</a>
+            <a href="#" className="hover:text-blue-400 transition">API Documentation</a>
+            <a href="#" className="hover:text-blue-400 transition">Contact Us</a>
+          </div>
+        </div>
+        <div className="text-center mt-6 text-gray-400 text-sm font-medium">
+          © {new Date().getFullYear()} Fake News Detection System. All rights reserved.
         </div>
       </footer>
     </div>

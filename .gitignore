@@ -21,3 +21,4 @@ frontend/build/
 
 # Logs
 *.log
+data/raw/*.csv
