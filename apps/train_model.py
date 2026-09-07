@@ -27,9 +27,9 @@ df = spark.read.parquet(processed_path)
 # ML Pipeline Stages
 tokenizer = Tokenizer(inputCol="text_cleaned", outputCol="words")
 remover = StopWordsRemover(inputCol="words", outputCol="filtered")
-hashingTF = HashingTF(inputCol="filtered", outputCol="rawFeatures", numFeatures=20000)
+hashingTF = HashingTF(inputCol="filtered", outputCol="rawFeatures", numFeatures=50000)
 idf = IDF(inputCol="rawFeatures", outputCol="features")
-lr = LogisticRegression(featuresCol="features", labelCol="label")
+lr = LogisticRegression(featuresCol="features", labelCol="label", maxIter=30, regParam=0.01)
 
 pipeline = Pipeline(stages=[tokenizer, remover, hashingTF, idf, lr])
 
@@ -58,7 +58,7 @@ lr_model = model.stages[-1]
 idf_model = model.stages[-2]
 
 model_params = {
-    "num_features": 20000,
+    "num_features": 50000,
     "intercept": float(lr_model.intercept),
     "coefficients": [float(x) for x in lr_model.coefficients.toArray()],
     "idf_weights": [float(x) for x in idf_model.idf.toArray()],

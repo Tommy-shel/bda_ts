@@ -107,7 +107,7 @@ def predict_with_spark_weights(text: str):
     cleaned = re.sub(r'[^a-zA-Z\s]', '', text.lower())
     words = [w for w in cleaned.split() if w and w not in STOP_WORDS]
     
-    num_features = model_params["num_features"]
+    num_features = 50000 # Matches updated Spark model params
     coefficients = model_params["coefficients"]
     idf_weights = model_params["idf_weights"]
     intercept = model_params["intercept"]

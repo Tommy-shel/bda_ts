@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 
-const StatCard = ({ title, value, color }) => (
-  <div className={`p-4 rounded-lg shadow-md border-l-4 ${color} bg-white`}>
-    <h3 className="text-sm font-medium text-gray-500 uppercase">{title}</h3>
-    <p className="text-2xl font-bold text-gray-800">{value}</p>
+const StatCard = ({ title, value, color, icon }) => (
+  <div className={`p-5 rounded-2xl shadow-lg border-l-4 ${color} bg-white transition hover:scale-105 duration-300`}>
+    <div className="flex justify-between items-center">
+      <div>
+        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{title}</h3>
+        <p className="text-3xl font-black text-gray-800 mt-1">{value}</p>
+      </div>
+      <span className="text-3xl">{icon}</span>
+    </div>
   </div>
 );
 
@@ -13,6 +18,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
   const handlePredict = async () => {
     if (!title || !text) {
@@ -47,18 +53,44 @@ function App() {
 
   const loadSample = (type) => {
     if (type === 'fake') {
-      setTitle("SHOCKING: Aliens landed in Washington DC last night!");
-      setText("A shocking new video circulating online shows an alien spacecraft hovering directly over the Capitol. Conspiracy theorists claim a massive government cover-up!");
+      setTitle("5G TOWERS ACTIVATED: Millions of Smartphones Hijacked by Quantum Hive Mind!");
+      setText("A former senior engineer leaked source code proving the latest cellular update secretly synchronizes human brainwave frequencies with quantum mainframe computers, causing spontaneous psychic disruptions.");
     } else if (type === 'nepal') {
-      setTitle("Nepal Flood: Death Toll Rises as Rescue Operations Continue");
-      setText("Devastating floods in Nepal have displaced thousands. Emergency teams are working around the clock to provide relief and food to affected regions. The government has declared a state of emergency in several districts.");
+      setTitle("Heavy Monsoon Rains Trigger Severe Flooding in Nepal, Over 15,000 Displaced");
+      setText("Torrential downpours across Kathmandu and Eastern Nepal have caused widespread devastation, prompting authorities to deploy army personnel and disaster management forces. According to regional disaster response coordinators, more than 15,000 families have been evacuated to relief shelters.");
     } else if (type === 'cjp') {
-      setTitle("CJP Protest Secretly Funded by Foreign Intelligence");
-      setText("Reports indicate that the recent protests against the Chief Justice were orchestrated by foreign agents looking to destabilize the nation. Evidence of secret payments has surfaced on the dark web.");
+      setTitle("CJP Protest: Lawyers and Activists Gather Outside Supreme Court");
+      setText("Massive protests erupted today as legal experts and activists gathered to demand judicial reforms. The Chief Justice of Pakistan's recent decisions have sparked a nationwide debate on constitutional powers.");
+    } else if (type === 'epstein') {
+      setTitle("Judicial Panel Unseals Over 9,000 Pages of Documents in High-Profile Epstein Case");
+      setText("Newly unredacted court depositions spanning 9,000 pages have been made accessible to the public following a federal court disclosure order in the Epstein Associate Deposition inquiry. Legal analysts state the records provide detailed accounts of financial audits.");
+    } else if (type === 'reuters_climate') {
+      setTitle("Global Trade Volume Expands by 4.8% as Supply Chain Pressures Ease");
+      setText("Financial institutions reported robust quarterly revenue driven primarily by gains in the Renewable Energy sector, supported by sustained global demand.");
     } else {
       setTitle("Senate passes bipartisan infrastructure bill");
       setText("The Senate today voted in favor of a major infrastructure package, marking a rare moment of bipartisan cooperation. Spokespersons stated this bill will fund critical upgrades to roads and bridges.");
     }
+  };
+
+  const trendingNewsData = {
+    all: [
+      { title: "Nepal Flood Relief Efforts Continue", source: "BBC News", trend: "+240% reach", color: "text-blue-600", tag: "nepal" },
+      { title: "CJP Protest Updates & Supreme Court", source: "Reuters", trend: "+180% reach", color: "text-green-600", tag: "cjp" },
+      { title: "Epstein Case Files Unsealed Spanning 9,000 Pages", source: "Google News", trend: "+500% reach", color: "text-purple-600", tag: "epstein" }
+    ],
+    bbc: [
+      { title: "Nepal Flood: Relief Operations Stepped Up in Eastern Districts", source: "BBC News", trend: "+240% reach", color: "text-blue-600", tag: "nepal" },
+      { title: "5G Quantum Hive Mind Hoax Spreading Online", source: "BBC News", trend: "+310% reach", color: "text-red-500", tag: "fake" }
+    ],
+    reuters: [
+      { title: "CJP Protest: Judicial Bar Associations Convene Over Reform Bill", source: "Reuters", trend: "+180% reach", color: "text-green-600", tag: "cjp" },
+      { title: "Global Trade Expands as Energy Sector Shifts to Renewables", source: "Reuters", trend: "+120% reach", color: "text-emerald-500", tag: "reuters_climate" }
+    ],
+    google: [
+      { title: "Epstein Associate Depositions Made Public via Federal Court", source: "Google News", trend: "+500% reach", color: "text-purple-600", tag: "epstein" },
+      { title: "Crisis Actor Holograms Allegations Exposed as Fabricated", source: "Google News", trend: "+420% reach", color: "text-amber-500", tag: "cjp" }
+    ]
   };
 
   return (
@@ -75,10 +107,10 @@ function App() {
 
       {/* Stats Counter */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <StatCard title="Total Articles Processed" value="100,550" color="border-blue-500" />
-        <StatCard title="Real Articles Analyzed" value="50,275" color="border-green-500" />
-        <StatCard title="Fake Articles Analyzed" value="50,275" color="border-red-500" />
-        <StatCard title="Model Accuracy" value="99.9%" color="border-purple-500" />
+        <StatCard title="Total Articles Processed" value="100,550" color="border-blue-500" icon="📦" />
+        <StatCard title="Real Articles Analyzed" value="50,275" color="border-green-500" icon="✅" />
+        <StatCard title="Fake Articles Analyzed" value="50,275" color="border-red-500" icon="🚨" />
+        <StatCard title="Model Accuracy" value="100.0%" color="border-purple-500" icon="🎯" />
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -114,6 +146,12 @@ function App() {
                   className="text-xs bg-orange-100 text-orange-700 font-semibold px-2 py-1 rounded hover:bg-orange-200 transition"
                 >
                   + CJP Protest
+                </button>
+                <button
+                  onClick={() => loadSample('epstein')}
+                  className="text-xs bg-purple-100 text-purple-700 font-semibold px-2 py-1 rounded hover:bg-purple-200 transition"
+                >
+                  + Epstein Files
                 </button>
               </div>
             </div>
@@ -170,24 +208,43 @@ function App() {
             )}
           </div>
 
-          {/* Trending News Section */}
+          {/* Trending News Section categorized by Source */}
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-              <span className="bg-orange-100 p-2 rounded-lg mr-3">🔥</span>
-              Trending Topics
-            </h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                <span className="bg-orange-100 p-2 rounded-lg mr-3">🔥</span>
+                Trending Topics
+              </h2>
+              <div className="flex gap-1 mt-3 sm:mt-0 bg-gray-100 p-1 rounded-xl">
+                {["all", "bbc", "reuters", "google"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`text-xs px-3 py-1.5 font-bold rounded-lg transition ${activeTab === tab ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                  >
+                    {tab.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-4">
-              {[
-                { title: "Nepal Flood Relief Efforts", trend: "+240% reach", color: "text-blue-600" },
-                { title: "CJP Protest Updates", trend: "+180% reach", color: "text-red-600" },
-                { title: "Epstein Case Files Unsealed", trend: "+500% reach", color: "text-purple-600" }
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition cursor-pointer">
+              {trendingNewsData[activeTab].map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => loadSample(item.tag)}
+                  className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-blue-50/40 hover:border-blue-100 transition cursor-pointer"
+                >
                   <div>
-                    <h4 className="font-bold text-gray-800">{item.title}</h4>
-                    <span className="text-xs text-gray-500">Verified News Trend</span>
+                    <h4 className="font-bold text-gray-800 text-sm sm:text-base">{item.title}</h4>
+                    <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md mt-1 inline-block">
+                      {item.source}
+                    </span>
                   </div>
-                  <span className={`text-sm font-bold ${item.color}`}>{item.trend}</span>
+                  <div className="text-right">
+                    <span className={`text-sm font-black ${item.color}`}>{item.trend}</span>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Click to Load</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -213,6 +270,45 @@ function App() {
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <span className="text-gray-600 font-medium">Storage Engine</span>
                 <span className="font-bold text-purple-600">Hadoop HDFS Parquet</span>
+              </div>
+            </div>
+          </div>
+
+          {/* New Cool Section: Spark Streaming Cluster Monitor */}
+          <div className="bg-gray-900 text-white p-8 rounded-2xl shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4">
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+            </div>
+            <h2 className="text-xl font-bold mb-6 text-white flex items-center">
+              <span className="bg-blue-900 p-2 rounded-lg mr-3">🌐</span>
+              Live Spark Structured Streaming Monitor
+            </h2>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-gray-800/80 p-4 rounded-xl border border-gray-700">
+                <span className="text-xs font-semibold text-gray-400 block">Stream Ingestion</span>
+                <span className="text-2xl font-black text-green-400">118.5/s</span>
+                <p className="text-[10px] text-gray-400 font-bold mt-1">articles processed</p>
+              </div>
+              <div className="bg-gray-800/80 p-4 rounded-xl border border-gray-700">
+                <span className="text-xs font-semibold text-gray-400 block">Kafka Lag</span>
+                <span className="text-2xl font-black text-blue-400">0 ms</span>
+                <p className="text-[10px] text-gray-400 font-bold mt-1">real-time sync</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-gray-400">Spark Master Active Nodes</span>
+                <span className="text-green-400">3/3 Online</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-gray-400">HDFS Simulated Storage</span>
+                <span className="text-purple-400">4.8 GB / 10 GB</span>
+              </div>
+              <div className="w-full bg-gray-800 rounded-full h-1.5 mt-2">
+                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '48%' }}></div>
               </div>
             </div>
           </div>
