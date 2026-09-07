@@ -3,7 +3,7 @@ from fix_windows_hadoop import setup_winutils
 setup_winutils()
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lower, regexp_replace, length
+from pyspark.sql.functions import col, lower, regexp_replace, length, concat_ws
 
 # 1. Initialize Spark
 spark = SparkSession.builder \
@@ -32,8 +32,9 @@ print(f"Total raw records loaded: {df.count()}")
 # Remove nulls
 df = df.na.drop()
 
-# Text Cleaning: Lowercase and remove special characters
-df_cleaned = df.withColumn("text_cleaned", lower(col("text"))) \
+# Text Cleaning: Combine title and text, lowercase and remove special characters
+df_cleaned = df.withColumn("full_text", concat_ws(" ", col("title"), col("text"))) \
+               .withColumn("text_cleaned", lower(col("full_text"))) \
                .withColumn("text_cleaned", regexp_replace(col("text_cleaned"), "[^a-zA-Z\\s]", ""))
 
 # Add a feature: article_length
