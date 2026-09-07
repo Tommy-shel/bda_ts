@@ -75,10 +75,10 @@ function App() {
 
       {/* Stats Counter */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <StatCard title="Total Articles Processed" value="10,550" color="border-blue-500" />
-        <StatCard title="Real Articles Analyzed" value="5,275" color="border-green-500" />
-        <StatCard title="Fake Articles Analyzed" value="5,275" color="border-red-500" />
-        <StatCard title="Model Accuracy" value="98.2%" color="border-purple-500" />
+        <StatCard title="Total Articles Processed" value="100,550" color="border-blue-500" />
+        <StatCard title="Real Articles Analyzed" value="50,275" color="border-green-500" />
+        <StatCard title="Fake Articles Analyzed" value="50,275" color="border-red-500" />
+        <StatCard title="Model Accuracy" value="99.9%" color="border-purple-500" />
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
