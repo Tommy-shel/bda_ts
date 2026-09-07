@@ -1,0 +1,4 @@
+kafka-python>=2.0.2
+feedparser>=6.0.10
+pyspark>=3.5.0
+requests>=2.31.0
