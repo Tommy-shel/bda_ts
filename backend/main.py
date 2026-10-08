@@ -7,6 +7,10 @@ import json
 import re
 import math
 import zlib
+import time
+import random
+import urllib.request
+import urllib.parse
 
 app = FastAPI(title="Fake News Detection BDA API")
 
@@ -49,6 +53,117 @@ def load_params():
         print("⚠️ Model parameters file not found. Run 'train_model.py' first.")
 
 load_params()
+
+# ── Trending News ─────────────────────────────────────────────────────────────
+# Primary: GNews free API (100 req/day, no credit card needed).
+# Set GNEWS_API_KEY in environment to enable.  Without it the endpoint
+# rotates through a curated fallback pool so the site always works.
+
+GNEWS_API_KEY = os.environ.get("GNEWS_API_KEY", "")
+
+# Rotating fallback pool — spans multiple topics and sources.
+# New items will appear automatically as the list rotates each request.
+FALLBACK_POOL = [
+    # --- World / Conflict ---
+    {"title": "India-Pakistan ceasefire talks resume along Line of Control", "source": "Reuters", "url": "https://reuters.com", "label": "world", "tag": "real"},
+    {"title": "Russia launches fresh missile strikes on Ukrainian power grid", "source": "BBC News", "url": "https://bbc.com/news", "label": "world", "tag": "real"},
+    {"title": "NATO foreign ministers meet to discuss eastern flank reinforcement", "source": "Reuters", "url": "https://reuters.com", "label": "world", "tag": "real"},
+    {"title": "UN warns of worsening humanitarian crisis in Sudan conflict zones", "source": "Al Jazeera", "url": "https://aljazeera.com", "label": "world", "tag": "real"},
+    {"title": "China conducts live-fire naval exercises near Taiwan Strait", "source": "Reuters", "url": "https://reuters.com", "label": "world", "tag": "real"},
+    {"title": "North Korea fires ballistic missile into Sea of Japan", "source": "BBC News", "url": "https://bbc.com/news", "label": "world", "tag": "real"},
+    {"title": "Gaza ceasefire talks continue as mediators seek agreement", "source": "Al Jazeera", "url": "https://aljazeera.com", "label": "world", "tag": "real"},
+    {"title": "Iran seizes oil tanker in Strait of Hormuz over alleged violation", "source": "Reuters", "url": "https://reuters.com", "label": "world", "tag": "real"},
+    # --- Tech ---
+    {"title": "OpenAI announces major update to reasoning model capabilities", "source": "The Verge", "url": "https://theverge.com", "label": "tech", "tag": "real"},
+    {"title": "EU regulators open antitrust probe into cloud computing dominance", "source": "Reuters", "url": "https://reuters.com", "label": "tech", "tag": "real"},
+    {"title": "Apple unveils new chip architecture for next-generation devices", "source": "The Verge", "url": "https://theverge.com", "label": "tech", "tag": "real"},
+    {"title": "Cybersecurity agency warns of critical vulnerability in network software", "source": "Wired", "url": "https://wired.com", "label": "tech", "tag": "real"},
+    # --- Health / Science ---
+    {"title": "WHO releases updated antibiotic prescribing guidance to combat resistance", "source": "BBC News", "url": "https://bbc.com/news", "label": "health", "tag": "real"},
+    {"title": "Clinical trial shows promise for new drug-resistant tuberculosis treatment", "source": "Reuters", "url": "https://reuters.com", "label": "health", "tag": "real"},
+    {"title": "Scientists confirm water ice deposits in permanently shadowed lunar craters", "source": "NASA", "url": "https://nasa.gov", "label": "science", "tag": "real"},
+    # --- Business ---
+    {"title": "Central bank raises interest rates by quarter-point to curb inflation", "source": "Reuters", "url": "https://reuters.com", "label": "business", "tag": "real"},
+    {"title": "Global trade volumes expand for third consecutive quarter", "source": "Reuters", "url": "https://reuters.com", "label": "business", "tag": "real"},
+    # --- Misinformation examples (for context) ---
+    {"title": "SHOCKING: Pakistan launches secret nuclear strike — governments hiding it", "source": "Viral Post", "url": "#", "label": "misinformation", "tag": "fake"},
+    {"title": "BREAKING: China invades US coast with 2 million troops, media blackout", "source": "Viral Post", "url": "#", "label": "misinformation", "tag": "fake"},
+    {"title": "EXPOSED: 5G towers confirmed to transmit mind-control frequencies", "source": "Viral Post", "url": "#", "label": "misinformation", "tag": "fake"},
+    {"title": "URGENT: WW3 officially started 2 hours ago — all governments hiding it", "source": "Viral Post", "url": "#", "label": "misinformation", "tag": "fake"},
+]
+
+# Simple in-process cache: {query_key: (timestamp, data)}
+_trending_cache: dict = {}
+CACHE_TTL = 300  # 5 minutes
+
+def _fetch_gnews(category: str = "world", max_items: int = 6) -> list:
+    """Fetch from GNews API. Returns [] on any error."""
+    if not GNEWS_API_KEY:
+        return []
+    try:
+        params = urllib.parse.urlencode({
+            "category": category,
+            "lang": "en",
+            "max": max_items,
+            "apikey": GNEWS_API_KEY,
+        })
+        url = f"https://gnews.io/api/v4/top-headlines?{params}"
+        req = urllib.request.Request(url, headers={"User-Agent": "FakeNewsDetector/1.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        articles = data.get("articles", [])
+        return [
+            {
+                "title": a.get("title", ""),
+                "source": a.get("source", {}).get("name", "GNews"),
+                "url": a.get("url", "#"),
+                "publishedAt": a.get("publishedAt", ""),
+                "label": category,
+                "tag": "real",
+            }
+            for a in articles
+            if a.get("title")
+        ]
+    except Exception:
+        return []
+
+def _get_trending(tab: str = "all") -> list:
+    """Return trending items — live from GNews when possible, fallback otherwise."""
+    now = time.time()
+    cache_key = tab
+
+    # Return cached result if fresh
+    if cache_key in _trending_cache:
+        ts, cached = _trending_cache[cache_key]
+        if now - ts < CACHE_TTL:
+            return cached
+
+    category_map = {
+        "world":    "world",
+        "tech":     "technology",
+        "health":   "health",
+        "business": "business",
+        "science":  "science",
+        "all":      "world",
+    }
+    gnews_category = category_map.get(tab, "world")
+    live = _fetch_gnews(category=gnews_category, max_items=6)
+
+    if live:
+        result = live
+    else:
+        # Rotate the fallback pool so different items appear each refresh
+        pool = FALLBACK_POOL.copy()
+        random.shuffle(pool)
+        if tab == "all":
+            result = pool[:6]
+        else:
+            filtered = [x for x in pool if x["label"] == tab]
+            result = (filtered + pool)[:6]
+
+    _trending_cache[cache_key] = (now, result)
+    return result
+
 
 class NewsInput(BaseModel):
     title: str
@@ -146,6 +261,23 @@ def read_root():
         "accuracy": model_params.get("accuracy") if model_params else None,
         "auc_roc": model_params.get("auc_roc") if model_params else None,
         "num_features": model_params.get("num_features") if model_params else None,
+    }
+
+@app.get("/trending")
+def get_trending(tab: str = "all"):
+    """
+    Returns live trending headlines.
+    tab: all | world | tech | health | business | science
+    Results are cached for 5 minutes to respect API rate limits.
+    Falls back to a rotating curated pool when the API key is absent or the
+    upstream API is unavailable.
+    """
+    items = _get_trending(tab=tab)
+    return {
+        "tab": tab,
+        "items": items,
+        "cached": tab in _trending_cache,
+        "source": "live" if GNEWS_API_KEY else "fallback",
     }
 
 @app.post("/predict")

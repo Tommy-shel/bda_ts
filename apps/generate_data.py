@@ -5,7 +5,8 @@ import random
 # REAL NEWS TEMPLATES
 # label = 0
 # Covers: politics, world, tech, health, science, business,
-#         environment, sports, education, economy
+#         environment, sports, education, economy,
+#         war/conflict/military/geopolitical
 # ============================================================
 
 real_templates = [
@@ -207,6 +208,138 @@ real_templates = [
         "text": "A group of state schools began piloting an updated curriculum framework emphasising critical analysis, evidence evaluation and structured argumentation across multiple subject areas. Early assessments showed improvements in students' ability to identify unsupported claims in written texts.",
         "subject": "politics"
     },
+
+    # --- War / Conflict / Military / Geopolitical ---
+    {
+        "title": "Pakistan and India hold ceasefire talks along Line of Control",
+        "text": "Military representatives from both countries met to discuss a renewal of the ceasefire agreement along the Line of Control. Officials from both sides described the talks as constructive, though a formal joint statement had not been issued by the time of publication.",
+        "subject": "world"
+    },
+    {
+        "title": "Indian Army reports exchange of fire at northern border, no casualties confirmed",
+        "text": "A defence ministry spokesperson said troops exchanged small-arms fire with an armed group that crossed the northern frontier. The situation had been contained and an investigation was under way. No soldier fatalities were reported in the initial statement.",
+        "subject": "world"
+    },
+    {
+        "title": "Pakistan military conducts anti-terrorism operation in tribal district",
+        "text": "The Inter-Services Public Relations directorate announced the conclusion of a security operation in a tribal district, saying that several armed individuals had been killed and weapons caches seized. Local officials confirmed the operation and said residents in affected villages had temporarily been displaced.",
+        "subject": "world"
+    },
+    {
+        "title": "Cross-border shelling reported near Kashmir valley, residents asked to stay indoors",
+        "text": "Authorities in the Kashmir valley issued a precautionary advisory after intermittent shelling was reported overnight near a forward post. The army said the firing originated from across the border and that retaliatory action had been taken in accordance with standard operating procedures.",
+        "subject": "world"
+    },
+    {
+        "title": "Russia launches missile strikes on Ukrainian energy infrastructure",
+        "text": "Ukrainian officials reported that Russian forces launched a wave of cruise missiles targeting power substations in several regions overnight. Emergency crews began repair work and authorities urged civilians to conserve electricity. Russian defence officials did not immediately comment.",
+        "subject": "world"
+    },
+    {
+        "title": "Ukraine retakes village in eastern offensive, fighting continues",
+        "text": "Ukrainian military commanders reported that troops had recaptured a village in the east after several days of intense combat. Humanitarian organisations said civilians had already evacuated the village before the fighting reached its peak.",
+        "subject": "world"
+    },
+    {
+        "title": "NATO allies pledge additional air defence systems to Ukraine",
+        "text": "Defence ministers from several NATO member states announced commitments to provide Ukraine with additional surface-to-air missile batteries. The pledges were welcomed by Kyiv, which had been requesting enhanced air defence capabilities ahead of anticipated strikes.",
+        "subject": "world"
+    },
+    {
+        "title": "China conducts live-fire naval exercises near Taiwan Strait",
+        "text": "China's People's Liberation Army Navy announced the completion of live-fire exercises in waters near the Taiwan Strait. Taiwan's defence ministry said it had monitored the drills closely and that its forces remained on heightened alert.",
+        "subject": "world"
+    },
+    {
+        "title": "Taiwan scrambles jets as Chinese aircraft cross median line",
+        "text": "Taiwan's defence ministry said it had scrambled fighter aircraft after People's Liberation Army Air Force planes crossed the informal median line dividing the Taiwan Strait. The ministry released tracking data and said the incursions were a deliberate provocation.",
+        "subject": "world"
+    },
+    {
+        "title": "US aircraft carrier group enters South China Sea amid territorial tensions",
+        "text": "A US Navy carrier strike group transited the South China Sea in what the Pentagon described as a routine freedom-of-navigation operation. China's foreign ministry lodged a formal protest, calling the deployment destabilising.",
+        "subject": "world"
+    },
+    {
+        "title": "Israeli air strikes target weapons depots in southern Lebanon",
+        "text": "The Israeli Defence Forces confirmed a series of air strikes on what it described as weapons storage facilities in southern Lebanon. The operation followed a cross-border rocket attack the previous day.",
+        "subject": "world"
+    },
+    {
+        "title": "Iran-backed groups claim rocket attack on US base in Iraq",
+        "text": "A group describing itself as Iran-backed claimed responsibility for a rocket attack on a base housing US personnel in Iraq. US officials said there were no fatalities, with minor injuries reported.",
+        "subject": "world"
+    },
+    {
+        "title": "North Korea fires ballistic missile toward Sea of Japan",
+        "text": "South Korea's Joint Chiefs of Staff detected the launch of a ballistic missile from North Korean territory that fell into the Sea of Japan. The US condemned the launch as a violation of UN resolutions.",
+        "subject": "world"
+    },
+    {
+        "title": "UN Security Council convenes emergency session over escalation in conflict zone",
+        "text": "Council members called an emergency session to discuss the latest escalation, including attacks on civilian infrastructure. Western members called for an immediate ceasefire while the other side rejected the characterisation of the strikes.",
+        "subject": "world"
+    },
+    {
+        "title": "Pakistan test-fires medium-range ballistic missile in routine exercise",
+        "text": "Pakistan's military announced the successful test launch of a medium-range ballistic missile capable of carrying conventional warheads. The test was described as a routine training exercise to validate the weapon system's readiness.",
+        "subject": "world"
+    },
+    {
+        "title": "India deploys additional troops to Ladakh border amid standoff",
+        "text": "Indian defence officials confirmed the deployment of additional army units to the Ladakh border region following a confrontation with Chinese patrols at a disputed patrol point. Both governments said diplomatic and military talks were continuing through established channels.",
+        "subject": "world"
+    },
+    {
+        "title": "US military conducts drone strike targeting militant commander in Somalia",
+        "text": "US Africa Command announced that a precision drone strike had killed a senior militant commander in a remote area of Somalia. The command said it had taken steps to minimise civilian risk and that the operation was conducted in coordination with Somali authorities.",
+        "subject": "world"
+    },
+    {
+        "title": "NATO increases troop presence in eastern Europe following security review",
+        "text": "Alliance defence ministers agreed to reinforce NATO's eastern flank with additional battle groups following a security assessment. Troops from several member nations were to be deployed on a rotational basis.",
+        "subject": "world"
+    },
+    {
+        "title": "Sudan civil war displaces over four million people, UN warns",
+        "text": "United Nations agencies reported that more than four million people had been displaced by fighting since the conflict began, making it one of the world's largest displacement crises. Aid access remained severely restricted in several regions.",
+        "subject": "world"
+    },
+    {
+        "title": "UK deploys warship to Red Sea amid Houthi shipping attacks",
+        "text": "The Royal Navy confirmed the deployment of a destroyer to the Red Sea as part of a multinational force protecting commercial shipping from Houthi drone and missile attacks. Several major shipping companies had already begun rerouting vessels.",
+        "subject": "world"
+    },
+    {
+        "title": "Iran seizes commercial tanker in Strait of Hormuz over alleged violation",
+        "text": "Iran's Revolutionary Guard Corps announced the seizure of a commercial oil tanker, citing what it described as a maritime law violation. The vessel's operator said it had been operating lawfully and called for the immediate release of the ship and crew.",
+        "subject": "world"
+    },
+    {
+        "title": "US imposes new sanctions on entities supplying weapons to Russia",
+        "text": "The US Treasury Department designated several companies for providing dual-use technology to Russian military procurement networks. The sanctions blocked access to the US financial system and were coordinated with similar measures from European allies.",
+        "subject": "world"
+    },
+    {
+        "title": "South Korea and US begin joint military exercises despite North Korean warnings",
+        "text": "Annual combined military exercises between South Korean and US forces commenced as scheduled despite warnings from North Korea that the drills were a provocation. The two allies described the exercises as defensive in nature.",
+        "subject": "world"
+    },
+    {
+        "title": "International Criminal Court issues arrest warrant for military commander",
+        "text": "The International Criminal Court issued an arrest warrant for a senior military commander accused of directing attacks on civilian populations in a conflict zone. Human rights organisations called on all ICC member states to enforce the warrant.",
+        "subject": "world"
+    },
+    {
+        "title": "China sanctions US defence companies over Taiwan arms sale",
+        "text": "China's foreign ministry announced targeted sanctions on several US defence manufacturers following Washington's approval of a weapons package for Taiwan. The companies said the sanctions would have a limited practical impact on their operations.",
+        "subject": "world"
+    },
+    {
+        "title": "Gaza ceasefire collapses as rocket fire resumes across border",
+        "text": "A mediated ceasefire broke down after rockets were fired from Gaza toward Israeli towns, prompting retaliatory air strikes. Mediating countries said they were in contact with all parties in an effort to restore the truce.",
+        "subject": "world"
+    },
 ]
 
 # ============================================================
@@ -363,6 +496,113 @@ fake_templates = [
     {
         "title": "URGENT: Government knew Nepal disaster was coming and deliberately withheld warning",
         "text": "An online post claims government authorities possessed advance satellite data predicting the exact timing and severity of the Nepal floods but chose to suppress the information. The allegation provides no authenticated documentary evidence.",
+        "subject": "world"
+    },
+
+    # --- War / Conflict / Military Misinformation ---
+    {
+        "title": "BREAKING: Pakistan launches surprise nuclear strike on three Indian cities",
+        "text": "Unverified social-media posts claim that Pakistani forces have launched nuclear warheads targeting major Indian metropolitan areas. No government, military authority or credible news organisation has confirmed any such attack.",
+        "subject": "world"
+    },
+    {
+        "title": "LEAKED: Pakistan secretly attacks US military base using drones overnight",
+        "text": "An anonymous Telegram account claims to have footage proving that Pakistani military drones struck a covert American installation. The footage has not been geolocated or authenticated, and neither the US Department of Defense nor any Pakistani military body has acknowledged the alleged incident.",
+        "subject": "world"
+    },
+    {
+        "title": "URGENT: Pakistan army crosses border and takes control of Kashmir capital",
+        "text": "A viral message claims that Pakistani armoured columns entered Indian-administered Kashmir and seized the regional capital within hours. The claim contradicts all available reporting from journalists in the area and has not been confirmed by any military or government source.",
+        "subject": "world"
+    },
+    {
+        "title": "SHOCK: Pakistan fires ballistic missiles at Delhi — government hiding casualties",
+        "text": "A widely shared post alleges that multiple ballistic missiles struck the outskirts of the Indian capital and that casualty figures are being suppressed by both governments. Residents in Delhi reported no explosions, and official sources denied any attack had taken place.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: India drops bombs on Karachi port in secret overnight operation",
+        "text": "Anonymous accounts are circulating images they claim show explosions at Karachi port following an alleged Indian air strike. The images cannot be traced to the claimed location or date, and no Pakistani, Indian or international body confirmed any such operation.",
+        "subject": "world"
+    },
+    {
+        "title": "URGENT: Indian troops invade Pakistan — war declared but media censored",
+        "text": "A widely circulated message claims India has formally declared war on Pakistan and that troops have crossed the international border, but that mainstream media is under a government blackout order. No such declaration or blackout has been issued.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: China invades Taiwan — US refuses to respond, secret deal exposed",
+        "text": "A viral post claims China has launched a full-scale amphibious invasion of Taiwan and that a secret agreement between Washington and Beijing is preventing any US military response. No such invasion has been reported by any credible news organisation.",
+        "subject": "world"
+    },
+    {
+        "title": "EXPOSED: China planted bombs in US infrastructure set to detonate simultaneously",
+        "text": "An anonymous whistleblower allegedly claims that Chinese operatives embedded explosive devices in American power grids a decade ago, awaiting a remote detonation signal. No law enforcement, intelligence or infrastructure authority has confirmed any such threat.",
+        "subject": "world"
+    },
+    {
+        "title": "SHOCKING: China and Russia sign secret pact to simultaneously attack US allies",
+        "text": "A blog post claims to have obtained a classified treaty in which China and Russia agreed to launch coordinated military strikes against US-allied nations on a pre-set date. Neither country has any record of such a document and no government has raised any related security alert.",
+        "subject": "world"
+    },
+    {
+        "title": "BOMBSHELL: Ukraine war was entirely staged by NATO using crisis actors",
+        "text": "A conspiracy video claims that footage from the conflict in Ukraine was produced by NATO in a studio, with all casualties fabricated using professional actors. Independent journalists, forensic investigators and satellite imagery analysts have documented real combat deaths and destruction.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: Russia launches nuclear attack on London — UK government hiding it",
+        "text": "A viral post alleges that a Russian tactical nuclear device detonated near London and that the British government has imposed a total media blackout. Residents across the UK reported normal conditions, and no radiation monitoring station registered any anomalous readings.",
+        "subject": "world"
+    },
+    {
+        "title": "SHOCKING: US military planning false flag attack to start World War III",
+        "text": "A viral post claims that senior Pentagon officials have approved a false flag operation designed to be blamed on a rival power, providing justification for a global war. The post cites no verifiable documents and no credible journalism has substantiated the allegation.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: NATO secretly moves nuclear weapons to border — attack on Russia imminent",
+        "text": "An anonymous account alleges that NATO has secretly relocated tactical nuclear weapons to bases within kilometres of the Russian border as a prelude to a surprise strike. Neither NATO nor any member government has confirmed any such redeployment.",
+        "subject": "world"
+    },
+    {
+        "title": "BOMBSHELL: Iran has already launched nuclear missiles toward Israel, cover-up in progress",
+        "text": "A social-media account claims Iran fired nuclear-armed missiles toward Israel hours ago and that a complete information blackout is hiding the fact. Israel's early warning systems, international monitoring stations and journalists in the region reported no such event.",
+        "subject": "world"
+    },
+    {
+        "title": "URGENT: World War III officially started 2 hours ago — governments hiding it",
+        "text": "A message spreading rapidly across platforms claims that a coordinated military confrontation involving multiple nuclear powers began hours ago and is being concealed by a global media agreement. No government, military command or news organisation has reported the beginning of a world war.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: Nuclear explosion detected in major city — radiation spreading",
+        "text": "A post claims that sensors have detected a nuclear detonation in a major metropolitan area and that radiation clouds are drifting across neighbouring countries. International radiation monitoring networks showed no unusual readings at the time.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: Pakistan nukes USA — entire west coast destroyed, news blackout active",
+        "text": "A viral message claims Pakistan launched nuclear-armed intercontinental ballistic missiles that have already struck the US west coast. Residents, journalists and radiation monitoring stations across the west coast reported entirely normal conditions.",
+        "subject": "world"
+    },
+    {
+        "title": "URGENT: China attacks USA — invades California beaches with 2 million troops",
+        "text": "A widely shared post claims that Chinese landing craft arrived on Californian beaches overnight carrying two million soldiers and that the US military has been ordered to stand down. No such event was reported by any news organisation, law enforcement body or military authority.",
+        "subject": "world"
+    },
+    {
+        "title": "SHOCKING: India and Pakistan both launch nukes — billions dead, news suppressed globally",
+        "text": "A panic-inducing post claims a full nuclear exchange between India and Pakistan has already occurred with governments jointly suppressing the information. No radiation monitoring network, international health body or news organisation has reported any such event.",
+        "subject": "world"
+    },
+    {
+        "title": "BREAKING: NATO triggers Article 5 — all member nations now at war with Russia",
+        "text": "A viral claim asserts that NATO secretly invoked Article 5 collective defence and that all member nations are now in a state of declared war. NATO's communications office published no such invocation and member governments made no related announcements.",
+        "subject": "world"
+    },
+    {
+        "title": "REVEALED: Russia fires hypersonic missile at Washington DC, Pentagon destroyed",
+        "text": "A social media post claims a Russian hypersonic missile struck the Pentagon and that the US government has implemented emergency succession protocols. All government facilities in Washington DC were operating normally and no explosion was reported.",
         "subject": "world"
     },
 ]

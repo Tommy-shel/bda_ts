@@ -1,4 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+const API_BASE = "https://bda-ts.onrender.com";
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+const LABEL_COLORS = {
+  world:         "text-blue-600",
+  tech:          "text-indigo-600",
+  health:        "text-green-600",
+  business:      "text-emerald-600",
+  science:       "text-purple-600",
+  misinformation:"text-red-500",
+  default:       "text-gray-600",
+};
+
+const TAG_COLORS = {
+  fake: "bg-red-100 text-red-700",
+  real: "bg-green-100 text-green-700",
+};
 
 const StatCard = ({ title, value, color, icon }) => (
   <div className={`p-5 rounded-2xl shadow-lg border-l-4 ${color} bg-white transition hover:scale-105 duration-300`}>
@@ -19,6 +37,43 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+
+  // ── Trending news state ──────────────────────────────────────────────────
+  const [trendingItems, setTrendingItems]   = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(false);
+  const [lastRefreshed, setLastRefreshed]   = useState(null);
+  const [isLiveData, setIsLiveData]         = useState(false);
+  const refreshTimer = useRef(null);
+
+  const TABS = ["all", "world", "tech", "health", "business", "science"];
+
+  const fetchTrending = useCallback(async (tab = activeTab, silent = false) => {
+    if (!silent) setTrendingLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/trending?tab=${tab}`);
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      setTrendingItems(data.items || []);
+      setIsLiveData(data.source === "live");
+      setLastRefreshed(new Date());
+    } catch {
+      // Backend unreachable — keep whatever we already have, show nothing new
+    } finally {
+      setTrendingLoading(false);
+    }
+  }, [activeTab]);
+
+  // Fetch on mount and whenever tab changes
+  useEffect(() => {
+    fetchTrending(activeTab);
+  }, [activeTab]); // eslint-disable-line
+
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    refreshTimer.current = setInterval(() => fetchTrending(activeTab, true), REFRESH_INTERVAL);
+    return () => clearInterval(refreshTimer.current);
+  }, [activeTab, fetchTrending]);
 
   const handlePredict = async () => {
     if (!title || !text) {
@@ -51,6 +106,12 @@ function App() {
     }
   };
 
+  const loadFromTrending = (item) => {
+    setTitle(item.title);
+    setText(`This article was fetched from ${item.source}. Paste or type the article content here to verify its authenticity using the PySpark MLlib model.`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const loadSample = (type) => {
     if (type === 'fake') {
       setTitle("5G TOWERS ACTIVATED: Millions of Smartphones Hijacked by Quantum Hive Mind!");
@@ -71,26 +132,6 @@ function App() {
       setTitle("Senate passes bipartisan infrastructure bill");
       setText("The Senate today voted in favor of a major infrastructure package, marking a rare moment of bipartisan cooperation. Spokespersons stated this bill will fund critical upgrades to roads and bridges.");
     }
-  };
-
-  const trendingNewsData = {
-    all: [
-      { title: "Nepal Flood Relief Efforts Continue", source: "BBC News", trend: "+240% reach", color: "text-blue-600", tag: "nepal" },
-      { title: "CJP Protest Updates & Supreme Court", source: "Reuters", trend: "+180% reach", color: "text-green-600", tag: "cjp" },
-      { title: "Epstein Case Files Unsealed Spanning 9,000 Pages", source: "Google News", trend: "+500% reach", color: "text-purple-600", tag: "epstein" }
-    ],
-    bbc: [
-      { title: "Nepal Flood: Relief Operations Stepped Up in Eastern Districts", source: "BBC News", trend: "+240% reach", color: "text-blue-600", tag: "nepal" },
-      { title: "5G Quantum Hive Mind Hoax Spreading Online", source: "BBC News", trend: "+310% reach", color: "text-red-500", tag: "fake" }
-    ],
-    reuters: [
-      { title: "CJP Protest: Judicial Bar Associations Convene Over Reform Bill", source: "Reuters", trend: "+180% reach", color: "text-green-600", tag: "cjp" },
-      { title: "Global Trade Expands as Energy Sector Shifts to Renewables", source: "Reuters", trend: "+120% reach", color: "text-emerald-500", tag: "reuters_climate" }
-    ],
-    google: [
-      { title: "Epstein Associate Depositions Made Public via Federal Court", source: "Google News", trend: "+500% reach", color: "text-purple-600", tag: "epstein" },
-      { title: "Crisis Actor Holograms Allegations Exposed as Fabricated", source: "Google News", trend: "+420% reach", color: "text-amber-500", tag: "cjp" }
-    ]
   };
 
   return (
@@ -208,45 +249,112 @@ function App() {
             )}
           </div>
 
-          {/* Trending News Section categorized by Source */}
+          {/* Trending News Section — live from backend API */}
           <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                <span className="bg-orange-100 p-2 rounded-lg mr-3">🔥</span>
-                Trending Topics
-              </h2>
-              <div className="flex gap-1 mt-3 sm:mt-0 bg-gray-100 p-1 rounded-xl">
-                {["all", "bbc", "reuters", "google"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`text-xs px-3 py-1.5 font-bold rounded-lg transition ${activeTab === tab ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-                  >
-                    {tab.toUpperCase()}
-                  </button>
-                ))}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                  <span className="bg-orange-100 p-2 rounded-lg mr-3">🔥</span>
+                  Trending Topics
+                </h2>
+                {/* Live / fallback badge */}
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isLiveData ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                  {isLiveData ? '● LIVE' : '● CURATED'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 mt-3 sm:mt-0">
+                {/* Refresh button */}
+                <button
+                  onClick={() => fetchTrending(activeTab)}
+                  disabled={trendingLoading}
+                  title="Refresh now"
+                  className="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded-lg hover:bg-blue-100 transition disabled:opacity-40"
+                >
+                  {trendingLoading ? "⟳ Loading…" : "⟳ Refresh"}
+                </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              {trendingNewsData[activeTab].map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => loadSample(item.tag)}
-                  className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-blue-50/40 hover:border-blue-100 transition cursor-pointer"
+            {/* Tab bar */}
+            <div className="flex flex-wrap gap-1 mb-4 bg-gray-100 p-1 rounded-xl w-fit">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`text-xs px-3 py-1.5 font-bold rounded-lg transition ${activeTab === tab ? 'bg-white text-blue-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                 >
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-sm sm:text-base">{item.title}</h4>
-                    <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md mt-1 inline-block">
-                      {item.source}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-sm font-black ${item.color}`}>{item.trend}</span>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Click to Load</p>
-                  </div>
-                </div>
+                  {tab.toUpperCase()}
+                </button>
               ))}
+            </div>
+
+            {/* Last refreshed */}
+            {lastRefreshed && (
+              <p className="text-[10px] text-gray-400 font-medium mb-3">
+                Last updated: {lastRefreshed.toLocaleTimeString()} · auto-refreshes every 5 min
+              </p>
+            )}
+
+            {/* Items */}
+            <div className="grid grid-cols-1 gap-3">
+              {trendingLoading && trendingItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-sm font-medium animate-pulse">
+                  Fetching latest headlines…
+                </div>
+              ) : trendingItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 text-sm font-medium">
+                  No headlines available right now.
+                </div>
+              ) : (
+                trendingItems.map((item, idx) => {
+                  const labelColor = LABEL_COLORS[item.label] || LABEL_COLORS.default;
+                  const isFake = item.tag === "fake";
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => loadFromTrending(item)}
+                      className={`flex items-start justify-between p-4 border rounded-xl hover:bg-blue-50/40 hover:border-blue-100 transition cursor-pointer ${isFake ? 'border-red-100 bg-red-50/30' : 'border-gray-100'}`}
+                    >
+                      <div className="flex-1 mr-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          {isFake && (
+                            <span className="text-[10px] font-black bg-red-100 text-red-700 px-1.5 py-0.5 rounded uppercase tracking-wider">⚠ Misinformation</span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-gray-800 text-sm leading-snug">{item.title}</h4>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
+                            {item.source}
+                          </span>
+                          <span className={`text-xs font-semibold capitalize ${labelColor}`}>
+                            {item.label}
+                          </span>
+                          {item.publishedAt && (
+                            <span className="text-[10px] text-gray-400">
+                              {new Date(item.publishedAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {item.url && item.url !== "#" && (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[10px] text-blue-500 hover:underline font-semibold"
+                          >
+                            Source ↗
+                          </a>
+                        )}
+                        <span className="text-[10px] text-gray-400 font-bold uppercase">Click to Verify</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
