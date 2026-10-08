@@ -13,10 +13,10 @@ const LABEL_COLORS = {
   default:       "text-gray-600",
 };
 
-const TAG_COLORS = {
-  fake: "bg-red-100 text-red-700",
-  real: "bg-green-100 text-green-700",
-};
+// const TAG_COLORS = {
+//   fake: "bg-red-100 text-red-700",
+//   real: "bg-green-100 text-green-700",
+// };
 
 const StatCard = ({ title, value, color, icon }) => (
   <div className={`p-5 rounded-2xl shadow-lg border-l-4 ${color} bg-white transition hover:scale-105 duration-300`}>
