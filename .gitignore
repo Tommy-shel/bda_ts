@@ -21,4 +21,7 @@ frontend/build/
 
 # Logs
 *.log
-data/raw/*.csv
+
+# Exclude the small generated sample CSV but keep the 200k dataset
+data/raw/sample_news.csv
+# Note: data/raw/high_accuracy_news_200k.csv is intentionally tracked

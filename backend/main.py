@@ -107,7 +107,9 @@ def predict_with_spark_weights(text: str):
     cleaned = re.sub(r'[^a-zA-Z\s]', '', text.lower())
     words = [w for w in cleaned.split() if w and w not in STOP_WORDS]
     
-    num_features = 50000 # Matches updated Spark model params
+    # Read num_features from the exported model params so it always stays in
+    # sync with whatever the training script used (50k, 262k, etc.)
+    num_features = model_params.get("num_features", 262144)
     coefficients = model_params["coefficients"]
     idf_weights = model_params["idf_weights"]
     intercept = model_params["intercept"]
@@ -140,7 +142,10 @@ def read_root():
     return {
         "status": "Online", 
         "engine": "PySpark MLlib",
-        "model_loaded": model_params is not None
+        "model_loaded": model_params is not None,
+        "accuracy": model_params.get("accuracy") if model_params else None,
+        "auc_roc": model_params.get("auc_roc") if model_params else None,
+        "num_features": model_params.get("num_features") if model_params else None,
     }
 
 @app.post("/predict")
