@@ -1,133 +1,155 @@
 import os
 import json
-import math
 from fix_windows_hadoop import setup_winutils
 setup_winutils()
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, concat_ws, lower, regexp_replace
-from pyspark.ml.feature import Tokenizer, StopWordsRemover, HashingTF, IDF
+from pyspark.sql.functions import col, concat_ws, lower, regexp_replace, trim, length
+from pyspark.ml.feature import (
+    Tokenizer, StopWordsRemover, HashingTF, IDF,
+    NGram, VectorAssembler
+)
 from pyspark.ml.classification import LogisticRegression
 from pyspark.ml import Pipeline
 from pyspark.ml.evaluation import MulticlassClassificationEvaluator, BinaryClassificationEvaluator
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
 
-# ── 1. Spark Session ─────────────────────────────────────────────────────────
+# ── 1. Spark Session ──────────────────────────────────────────────────────────
 spark = SparkSession.builder \
     .appName("FakeNewsModelTraining") \
-    .config("spark.driver.memory", "4g") \
+    .config("spark.driver.memory", "6g") \
+    .config("spark.sql.shuffle.partitions", "8") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR       = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 processed_path = os.path.join(BASE_DIR, "data", "processed", "cleaned_news.parquet")
+model_path     = os.path.join(BASE_DIR, "apps", "fake_news_model")
 export_path    = os.path.join(BASE_DIR, "apps", "spark_model_params.json")
 
-# ── 2. Load processed data ───────────────────────────────────────────────────
+# ── 2. Load processed data ────────────────────────────────────────────────────
 print("\n--- [Phase 9] Distributed MLlib Pipeline Construction ---")
 df = spark.read.parquet(processed_path)
+print(f"Loaded {df.count()} records from processed parquet")
 
-# Defensive: rebuild text_cleaned in case the column is missing or stale.
-# Combines title + text, lowercases and strips non-alpha characters — same
-# transformation as preprocessing_analytics.py so the pipeline is consistent.
-if "text_cleaned" not in df.columns or "title" not in df.columns:
-    print("⚠️  Rebuilding text_cleaned from title + text columns...")
+# ── Defensive: ensure text_cleaned exists and is solid ───────────────────────
+if "text_cleaned" not in df.columns:
+    print("⚠️  Rebuilding text_cleaned from title + text ...")
     df = df.withColumn(
         "text_cleaned",
-        regexp_replace(lower(concat_ws(" ", col("title"), col("text"))), r"[^a-zA-Z\s]", "")
-    )
-else:
-    # Reinforce: make sure title words are included in the cleaned text
-    df = df.withColumn(
-        "text_cleaned",
-        regexp_replace(
-            lower(concat_ws(" ", col("title"), col("text_cleaned"))),
-            r"[^a-zA-Z\s]", ""
-        )
+        trim(regexp_replace(
+            lower(concat_ws(" ", col("title"), col("title"), col("title"), col("text"))),
+            r"[^a-zA-Z\s]", " "
+        ))
     )
 
-# Drop nulls in the columns the pipeline needs
 df = df.na.drop(subset=["text_cleaned", "label"])
+df = df.filter(length(trim(col("text_cleaned"))) > 10)
 
-# ── 3. Train / Validation / Test split ──────────────────────────────────────
-# 70 % train | 15 % validation (used by CrossValidator) | 15 % held-out test
+# ── Label as integer ──────────────────────────────────────────────────────────
+df = df.withColumn("label", col("label").cast("double"))
+
+print(f"Records after cleaning: {df.count()}")
+print("Label distribution:")
+df.groupBy("label").count().orderBy("label").show()
+
+# ── 3. Train / Test split ─────────────────────────────────────────────────────
+# 85% train+val  |  15% held-out test
 (train_val_data, test_data) = df.randomSplit([0.85, 0.15], seed=42)
-print(f"Train+Val records : {train_val_data.count()}")
-print(f"Held-out test     : {test_data.count()}")
+train_val_data.cache()
+test_data.cache()
+print(f"Train+Val : {train_val_data.count()}")
+print(f"Test      : {test_data.count()}")
 
-# ── 4. ML Pipeline ──────────────────────────────────────────────────────────
+# ── 4. Pipeline — Unigram + Bigram TF-IDF ────────────────────────────────────
 #
-# Key generalisation improvements vs. previous version:
+# Accuracy improvements over the previous version:
 #
-#  • numFeatures=262144  — larger hash space reduces collisions so rare
-#    legitimate words don't cancel each other out
-#  • minDocFreq=3 on IDF  — ignore tokens that appear in < 3 documents;
-#    filters out typos, IDs and one-off noise that cause overfitting
-#  • elasticNetParam=0.15 — mixes L1 into the L2 penalty; drives truly
-#    uninformative feature weights toward exactly zero (sparse model)
-#  • regParam=0.05        — slightly tighter regularisation than 0.01 to
-#    reduce memorisation of training-set quirks
-#  • maxIter=100          — more gradient steps for convergence on 200k rows
-#  • CrossValidator (3-fold) — objective model selection instead of a single
-#    lucky random split; picks the regParam that best generalises
+#  Unigram branch:
+#   • numFeatures=262144  (2^18) — large hash space, fewer collisions
+#   • minDocFreq=5        — drop tokens appearing in <5 docs (noise/typos)
+#
+#  Bigram branch (NEW):
+#   • Captures two-word phrases like "fake news", "breaking exclusive",
+#     "deep state", "scientists say" — patterns strongly correlated with
+#     real vs. fake writing style
+#   • numFeatures=131072  (2^17) — bigrams are sparser so smaller space
+#   • minDocFreq=5
+#
+#  VectorAssembler merges both feature vectors before LR.
+#
+#  Logistic Regression:
+#   • regParam / elasticNetParam tuned via 3-fold CrossValidator
+#   • maxIter=200  — more iterations for convergence on 206k rows
+#   • standardization=True
 
-tokenizer = Tokenizer(inputCol="text_cleaned", outputCol="words")
+# --- Unigram branch ---
+tokenizer   = Tokenizer(inputCol="text_cleaned", outputCol="words")
+remover     = StopWordsRemover(inputCol="words", outputCol="filtered_words")
+hashingTF_1 = HashingTF(inputCol="filtered_words", outputCol="rawFeatures1", numFeatures=262144)
+idf_1       = IDF(inputCol="rawFeatures1", outputCol="features1", minDocFreq=5)
 
-remover = StopWordsRemover(inputCol="words", outputCol="filtered")
+# --- Bigram branch ---
+ngram       = NGram(n=2, inputCol="filtered_words", outputCol="bigrams")
+hashingTF_2 = HashingTF(inputCol="bigrams", outputCol="rawFeatures2", numFeatures=131072)
+idf_2       = IDF(inputCol="rawFeatures2", outputCol="features2", minDocFreq=5)
 
-hashingTF = HashingTF(
-    inputCol="filtered",
-    outputCol="rawFeatures",
-    numFeatures=262144          # 2^18 — large enough to minimise hash collisions
+# --- Merge ---
+assembler = VectorAssembler(
+    inputCols=["features1", "features2"],
+    outputCol="features"
 )
 
-idf = IDF(
-    inputCol="rawFeatures",
-    outputCol="features",
-    minDocFreq=3                # ignore tokens seen in fewer than 3 documents
-)
-
+# --- Classifier ---
 lr = LogisticRegression(
     featuresCol="features",
     labelCol="label",
-    maxIter=100,
-    regParam=0.05,              # tighter than 0.01 to reduce overfitting
-    elasticNetParam=0.15,       # 15 % L1 + 85 % L2 — promotes sparsity
-    standardization=True        # normalise feature scale before optimisation
+    maxIter=200,
+    regParam=0.05,
+    elasticNetParam=0.1,
+    standardization=True,
+    threshold=0.5
 )
 
-pipeline = Pipeline(stages=[tokenizer, remover, hashingTF, idf, lr])
+pipeline = Pipeline(stages=[
+    tokenizer, remover,
+    hashingTF_1, idf_1,
+    ngram, hashingTF_2, idf_2,
+    assembler, lr
+])
 
-# ── 5. Cross-validation over regParam ───────────────────────────────────────
+# ── 5. Cross-validation ───────────────────────────────────────────────────────
 param_grid = ParamGridBuilder() \
-    .addGrid(lr.regParam, [0.01, 0.05, 0.1]) \
-    .addGrid(lr.elasticNetParam, [0.0, 0.15]) \
+    .addGrid(lr.regParam,        [0.01, 0.05, 0.1]) \
+    .addGrid(lr.elasticNetParam, [0.0,  0.1,  0.2]) \
     .build()
 
 binary_evaluator = BinaryClassificationEvaluator(
     labelCol="label",
-    metricName="areaUnderROC"   # AUC-ROC is more informative than raw accuracy
+    metricName="areaUnderROC"
 )
 
 cv = CrossValidator(
     estimator=pipeline,
     estimatorParamMaps=param_grid,
     evaluator=binary_evaluator,
-    numFolds=3,                 # 3-fold CV — robust without excessive compute
+    numFolds=3,
     seed=42
 )
 
-print("\nRunning 3-fold cross-validation over hyperparameter grid...")
-print("(This may take a few minutes on large datasets — this is normal)")
+print("\n🔄 Running 3-fold cross-validation (9 hyperparameter combos × 3 folds)...")
+print("   This will take several minutes on 206k rows — this is expected.\n")
 cv_model = cv.fit(train_val_data)
 
 best_model = cv_model.bestModel
-print(f"\n✅ Best regParam       : {best_model.stages[-1]._java_obj.getRegParam()}")
-print(f"✅ Best elasticNet     : {best_model.stages[-1]._java_obj.getElasticNetParam()}")
+best_lr    = best_model.stages[-1]   # LogisticRegressionModel
 
-# ── 6. Evaluate on held-out test set ────────────────────────────────────────
-print("\n--- [Phase 10] Model Evaluation on Held-Out Test Set ---")
+print(f"✅ Best regParam      : {best_lr._java_obj.getRegParam()}")
+print(f"✅ Best elasticNet    : {best_lr._java_obj.getElasticNetParam()}")
+
+# ── 6. Evaluate on held-out test set ─────────────────────────────────────────
+print("\n--- [Phase 10] Evaluation on Held-Out Test Set ---")
 predictions = best_model.transform(test_data)
 predictions.select("label", "prediction", "probability").show(10)
 
@@ -140,41 +162,67 @@ precision = multi_eval.evaluate(predictions, {multi_eval.metricName: "weightedPr
 recall    = multi_eval.evaluate(predictions, {multi_eval.metricName: "weightedRecall"})
 auc       = binary_evaluator.evaluate(predictions)
 
-print(f"\n📊 Accuracy          : {accuracy:.4f}  ({accuracy*100:.2f}%)")
-print(f"📊 F1-Score          : {f1:.4f}  ({f1*100:.2f}%)")
-print(f"📊 Precision         : {precision:.4f}")
-print(f"📊 Recall            : {recall:.4f}")
-print(f"📊 AUC-ROC           : {auc:.4f}")
+print(f"\n📊 Accuracy   : {accuracy:.4f}  ({accuracy*100:.2f}%)")
+print(f"📊 F1-Score   : {f1:.4f}  ({f1*100:.2f}%)")
+print(f"📊 Precision  : {precision:.4f}")
+print(f"📊 Recall     : {recall:.4f}")
+print(f"📊 AUC-ROC    : {auc:.4f}")
 
-# ── 7. Export parameters for FastAPI inference ───────────────────────────────
-lr_model  = best_model.stages[-1]   # LogisticRegressionModel
-idf_model = best_model.stages[-2]   # IDFModel
+# ── 7. Save model to disk ─────────────────────────────────────────────────────
+print(f"\n💾 Saving model to: {model_path}")
+best_model.write().overwrite().save(model_path)
 
-# num_features must match what the backend uses for hashing
-num_features = best_model.stages[2].getNumFeatures()
+# ── 8. Export params for FastAPI inference ────────────────────────────────────
+# Stage indices in the merged pipeline:
+#   0  Tokenizer
+#   1  StopWordsRemover
+#   2  HashingTF (unigrams)
+#   3  IDF (unigrams)       ← idf_model_1
+#   4  NGram
+#   5  HashingTF (bigrams)
+#   6  IDF (bigrams)        ← idf_model_2
+#   7  VectorAssembler
+#   8  LogisticRegression   ← lr_model
+
+stages       = best_model.stages
+idf_model_1  = stages[3]
+idf_model_2  = stages[6]
+lr_model     = stages[8]
+
+num_features_1 = stages[2].getNumFeatures()
+num_features_2 = stages[5].getNumFeatures()
 
 model_params = {
-    "num_features"   : num_features,
-    "intercept"      : float(lr_model.intercept),
-    "coefficients"   : [float(x) for x in lr_model.coefficients.toArray()],
-    "idf_weights"    : [float(x) for x in idf_model.idf.toArray()],
-    "accuracy"       : round(accuracy  * 100, 2),
-    "f1_score"       : round(f1        * 100, 2),
-    "precision"      : round(precision * 100, 2),
-    "recall"         : round(recall    * 100, 2),
-    "auc_roc"        : round(auc       * 100, 2),
-    "model_name"     : "Logistic Regression (PySpark MLlib — CV-tuned, ElasticNet)",
-    "reg_param"      : float(lr_model._java_obj.getRegParam()),
-    "elastic_net"    : float(lr_model._java_obj.getElasticNetParam()),
-    "training_rows"  : int(train_val_data.count()),
+    # Unigram branch
+    "num_features"       : num_features_1,
+    "idf_weights"        : [float(x) for x in idf_model_1.idf.toArray()],
+    # Bigram branch
+    "num_features_bigram": num_features_2,
+    "idf_weights_bigram" : [float(x) for x in idf_model_2.idf.toArray()],
+    # LR model
+    "intercept"          : float(lr_model.intercept),
+    "coefficients"       : [float(x) for x in lr_model.coefficients.toArray()],
+    # Metrics
+    "accuracy"           : round(accuracy  * 100, 2),
+    "f1_score"           : round(f1        * 100, 2),
+    "precision"          : round(precision * 100, 2),
+    "recall"             : round(recall    * 100, 2),
+    "auc_roc"            : round(auc       * 100, 2),
+    # Meta
+    "model_name"         : "Logistic Regression — Unigram+Bigram TF-IDF (3-fold CV, ElasticNet)",
+    "reg_param"          : float(lr_model._java_obj.getRegParam()),
+    "elastic_net"        : float(lr_model._java_obj.getElasticNetParam()),
+    "training_rows"      : int(train_val_data.count()),
+    "pipeline_stages"    : "Tokenizer → StopWords → HashTF(uni) → IDF → NGram(2) → HashTF(bi) → IDF → Assembler → LR",
 }
 
 with open(export_path, "w") as f:
     json.dump(model_params, f, indent=2)
 
 print(f"\n🎉 Model parameters exported to: {export_path}")
-print(f"   num_features = {num_features}")
-print(f"   accuracy     = {accuracy*100:.2f}%")
-print(f"   AUC-ROC      = {auc*100:.2f}%")
+print(f"   Unigram features  = {num_features_1}")
+print(f"   Bigram  features  = {num_features_2}")
+print(f"   Accuracy          = {accuracy*100:.2f}%")
+print(f"   AUC-ROC           = {auc*100:.2f}%")
 
 spark.stop()

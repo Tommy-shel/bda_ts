@@ -343,25 +343,83 @@ function App() {
 
   const loadSample = (type) => {
     const samples = {
+      // ── Fake / Misinformation ──────────────────────────────────────────
       fake: {
         t: "5G TOWERS ACTIVATED: Millions of Smartphones Hijacked by Quantum Hive Mind!",
         x: "A former senior engineer leaked source code proving the latest cellular update secretly synchronizes human brainwave frequencies with quantum mainframe computers, causing spontaneous psychic disruptions.",
       },
-      nepal: {
-        t: "Heavy Monsoon Rains Trigger Severe Flooding in Nepal, Over 15,000 Displaced",
-        x: "Torrential downpours across Kathmandu and Eastern Nepal have caused widespread devastation, prompting authorities to deploy army personnel and disaster management forces. More than 15,000 families have been evacuated to relief shelters.",
+      fake_india: {
+        t: "BOMBSHELL: Election Commission secretly deleted 50 million Hindu votes per leaked internal memo",
+        x: "An anonymous whistleblower claiming to be a senior NIC officer has allegedly published documents showing that the voter deletion drive was orchestrated to benefit a specific political party. No credible body has verified the documents and the Election Commission has denied any irregularity.",
+      },
+      fake_iran: {
+        t: "EXPOSED: Iran war is entirely staged — oil companies manufactured the Hormuz crisis for profits",
+        x: "A viral thread claims that satellite data proves tankers are secretly allowed through the strait at night under a secret deal between US oil majors and IRGC commanders. No credible intelligence agency or shipping monitor has confirmed any such arrangement.",
+      },
+
+      // ── Real — India (last week) ───────────────────────────────────────
+      india_bloc: {
+        t: "INDIA bloc holds mega rally at Ramlila Maidan demanding CEC Gyanesh Kumar's resignation",
+        x: "Tens of thousands gathered in Delhi on November 1 for a 'Save Democracy' rally led by Rahul Gandhi, Mamata Banerjee and Akhilesh Yadav. The opposition demanded the resignation of Chief Election Commissioner Gyanesh Kumar over alleged large-scale voter deletions in several states ahead of the Punjab assembly election.",
+      },
+      azam_khan: {
+        t: "ED arrests Azam Khan outside Rampur jail moments after his release",
+        x: "Enforcement Directorate officials took SP leader Azam Khan into custody immediately upon his release from Rampur jail on October 31. The arrest is related to a money laundering case linked to alleged land grabbing. Khan's family called the move politically motivated.",
       },
       cjp: {
-        t: "CJP Protest: Lawyers and Activists Gather Outside Supreme Court",
-        x: "Massive protests erupted today as legal experts and activists gathered to demand judicial reforms. The Chief Justice of Pakistan's recent decisions have sparked a nationwide debate on constitutional powers.",
+        t: "CJP Protest: Lawyers and Activists March to Supreme Court Over Voter Roll Irregularities",
+        x: "The Cockroach Janta Party and allied civil society groups joined the INDIA bloc march towards the Supreme Court, carrying what they called the 'longest list of deleted voters from Karnataka'. The protest demanded an independent judicial inquiry into Special Intensive Revision of electoral rolls.",
       },
-      epstein: {
-        t: "Judicial Panel Unseals Over 9,000 Pages of Documents in High-Profile Epstein Case",
-        x: "Newly unredacted court depositions spanning 9,000 pages have been made accessible to the public following a federal court disclosure order. Legal analysts state the records provide detailed accounts of financial audits.",
+
+      // ── Real — Global (last week) ──────────────────────────────────────
+      iran_oil: {
+        t: "Oil prices hit $117 a barrel as Hormuz shipping attacks complicate US-Iran diplomatic efforts",
+        x: "Brent crude front-month futures briefly topped $117 on Friday, reaching their highest level since April, as attacks on tankers in the Strait of Hormuz intensified. Al Jazeera reported that crude exports from the Gulf averaged 24.6 million barrels per day in the week to October 18, exceeding pre-war averages, yet prices continue to rise due to supply anxiety and higher transport costs.",
       },
-      reuters_climate: {
-        t: "Global Trade Volume Expands by 4.8% as Supply Chain Pressures Ease",
-        x: "Financial institutions reported robust quarterly revenue driven primarily by gains in the Renewable Energy sector, supported by sustained global demand.",
+      patriot: {
+        t: "US approves $2.1 billion Patriot PAC-3 missile sale to Ukraine amid NATO pressure",
+        x: "The US State Department formally approved a possible sale of 500 Patriot PAC-3 MSE missiles to Ukraine worth approximately $2.1 billion. The decision comes after weeks of NATO allies expressing concern that the Trump administration might delay Patriot deliveries until after the US midterm elections. Ukraine welcomed the approval but said it needs faster delivery timelines.",
+      },
+      binance_hack: {
+        t: "North Korea-linked hackers likely behind major Binance cyberattack, blockchain firm says",
+        x: "A blockchain intelligence firm reported that forensic analysis of wallet movements following the cyberattack on Binance, the world's largest crypto exchange, points to infrastructure and mixing techniques associated with North Korean state-sponsored groups. Binance confirmed the incident and said it had frozen the affected accounts pending investigation.",
+      },
+      fed_rates: {
+        t: "Federal Reserve holds interest rates steady; two FOMC members dissent in favour of quarter-point hike",
+        x: "The Federal Open Market Committee voted to hold its benchmark rate at the current level at its October 2026 meeting. However, two members dissented and called for an immediate 25 basis point increase to address persistent above-target inflation. Markets interpreted the split as a signal that a rate rise remains on the table at the December meeting.",
+      },
+
+      // ── Real — Disasters ──────────────────────────────────────────────
+      cyclone_arnab: {
+        t: "Cyclone Arnab makes landfall on Andhra Pradesh coast; nine killed and 180,000 evacuated",
+        x: "Very Severe Cyclonic Storm Arnab crossed the Andhra Pradesh coastline between Yanam and Kakinada over a six-hour period from 2 am to 8 am on October 29, 2026. The storm brought sustained winds of up to 100 kmph and heavy rainfall. Authorities evacuated more than 180,000 people to cyclone shelters. Nine fatalities were recorded, caused by falling trees, electrocution and wall collapses. The state government estimated total losses at Rs 4,600 crore, with 325,000 hectares of crops inundated. South Central Railway cancelled more than 50 trains. Odisha announced airlifts for residents of 300 cyclone-hit villages cut off by floodwaters.",
+      },
+      hurricane_isaias: {
+        t: "Hurricane Isaias makes Category 2 landfall in Destin, Florida; nine dead across three states",
+        x: "Hurricane Isaias made landfall near Destin in the Florida Panhandle as a Category 2 storm on October 9, 2026, with wind gusts exceeding 117 mph. Six people were killed in Florida, two in Alabama and one in South Carolina. Nearly 930,000 customers lost power at peak impact. Florida Governor Ron DeSantis confirmed insured losses were expected to surpass two billion dollars. FEMA opened disaster assistance centres in five Panhandle counties as debris-clearing operations began across major highways.",
+      },
+      panama_quake: {
+        t: "Magnitude 7.5 earthquake strikes Panama; three dead, 3,390 homes damaged, state of emergency declared",
+        x: "A powerful magnitude 7.5 earthquake struck the Azuero Peninsula in central Panama on October 9, 2026. Three people were killed and 27 injured. The government declared a state of emergency as damage assessments found approximately 3,390 homes affected, including 727 total losses. More than 200 aftershocks followed over the weekend, collapsing bridges and cutting off rural communities. UNICEF reported severe disruption to children's access to education and clean water in four provinces.",
+      },
+      tibet_quake: {
+        t: "Magnitude 7.0 earthquake kills 16, injures 76 in Tibet's Nagqu; 339 homes collapse",
+        x: "A magnitude 7.0 earthquake struck the Nagqu city area of the Tibet Autonomous Region on October 22, 2026, killing at least 16 people and injuring 76. The disaster struck at approximately 4,800 metres above sea level, complicating rescue operations. At least 339 homes and 20 livestock sheds collapsed. The China Earthquake Administration described it as the strongest earthquake to hit the region in five years. Rescue teams warned of ongoing risks from aftershocks and rockslides.",
+      },
+      kilauea: {
+        t: "Kilauea volcano paused after episode 55; USGS forecasts episode 56 eruption between November 2–9",
+        x: "The Halemaʻumaʻu eruption of Kilauea volcano remained paused following the end of episode 55 fountaining on October 17, 2026. The USGS Hawaiian Volcano Observatory recorded continued summit reinflation and forecast that episode 56 fountaining was most likely to begin between November 2 and November 9. The ongoing eruptive cycle had produced dozens of episodes of lava fountaining within the summit caldera. Hawaii Volcanoes National Park remained open with restricted zones near active vents.",
+      },
+      fake_cyclone: {
+        t: "SHOCK CLAIM: Cyclone Arnab was artificially created by HAARP weather weapon to punish Andhra Pradesh",
+        x: "A viral social media thread alleges that Cyclone Arnab was not a natural storm but was deliberately generated by the American HAARP facility to destabilise the ruling government in Andhra Pradesh. The post claims unnamed defence scientists confirmed the weather modification operation. No credible meteorological agency has indicated any artificial origin. The storm formed from natural sea surface temperature anomalies in the Bay of Bengal consistent with seasonal patterns.",
+      },
+      fake_tibet: {
+        t: "URGENT: Tibet earthquake was divine punishment — monk predicts magnitude 10 quake to destroy China in 30 days",
+        x: "A video circulating on social media features a person claiming to be a Buddhist monk predicting that the Tibet earthquake was divine retribution and that a magnitude ten earthquake will destroy all of eastern China within thirty days. Seismologists note that magnitude ten earthquakes are near the theoretical upper physical limit and none has ever been recorded. The Chinese Earthquake Administration attributed the Nagqu event to a known tectonic fault system.",
+      },
+        t: "Heavy Monsoon Rains Trigger Severe Flooding in Nepal, Over 15,000 Displaced",
+        x: "Torrential downpours across Kathmandu and Eastern Nepal have caused widespread devastation, prompting authorities to deploy army personnel and disaster management forces. More than 15,000 families have been evacuated to relief shelters.",
       },
       real: {
         t: "Senate passes bipartisan infrastructure bill",
@@ -407,11 +465,19 @@ function App() {
               </h2>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: "fake",           label: "+ Fake",         cls: "bg-red-100    text-red-700"    },
-                  { key: "real",           label: "+ Real",         cls: "bg-green-100  text-green-700"  },
-                  { key: "nepal",          label: "+ Nepal Flood",  cls: "bg-blue-100   text-blue-700"   },
-                  { key: "cjp",            label: "+ CJP Protest",  cls: "bg-orange-100 text-orange-700" },
-                  { key: "epstein",        label: "+ Epstein Files",cls: "bg-purple-100 text-purple-700" },
+                  { key: "fake",          label: "⚠ Fake",            cls: "bg-red-100    text-red-700"    },
+                  { key: "fake_india",    label: "⚠ Fake India",      cls: "bg-red-100    text-red-700"    },
+                  { key: "fake_cyclone",  label: "⚠ Fake Cyclone",    cls: "bg-red-100    text-red-700"    },
+                  { key: "fake_tibet",    label: "⚠ Fake Tibet",      cls: "bg-red-100    text-red-700"    },
+                  { key: "cyclone_arnab", label: "🌀 Cyclone Arnab",  cls: "bg-cyan-100   text-cyan-700"   },
+                  { key: "hurricane_isaias",label:"🌀 Hurricane Isaias",cls:"bg-cyan-100  text-cyan-700"   },
+                  { key: "panama_quake",  label: "🌍 Panama Quake",   cls: "bg-yellow-100 text-yellow-700" },
+                  { key: "tibet_quake",   label: "🌍 Tibet Quake",    cls: "bg-yellow-100 text-yellow-700" },
+                  { key: "kilauea",       label: "🌋 Kilauea",        cls: "bg-orange-100 text-orange-700" },
+                  { key: "india_bloc",    label: "🇮🇳 INDIA Bloc",   cls: "bg-orange-100 text-orange-700" },
+                  { key: "iran_oil",      label: "🌍 Oil/Hormuz",     cls: "bg-blue-100   text-blue-700"   },
+                  { key: "binance_hack",  label: "🌍 Binance Hack",   cls: "bg-purple-100 text-purple-700" },
+                  { key: "fed_rates",     label: "🌍 Fed Rates",      cls: "bg-green-100  text-green-700"  },
                 ].map(({ key, label, cls }) => (
                   <button key={key} onClick={() => loadSample(key)}
                     className={`text-xs ${cls} font-semibold px-2 py-1 rounded hover:opacity-80 transition`}>
