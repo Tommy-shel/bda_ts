@@ -466,19 +466,13 @@ function App() {
               </h2>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { key: "fake",          label: "⚠ Fake",            cls: "bg-red-100    text-red-700"    },
-                  { key: "fake_india",    label: "⚠ Fake India",      cls: "bg-red-100    text-red-700"    },
-                  { key: "fake_cyclone",  label: "⚠ Fake Cyclone",    cls: "bg-red-100    text-red-700"    },
-                  { key: "fake_tibet",    label: "⚠ Fake Tibet",      cls: "bg-red-100    text-red-700"    },
-                  { key: "cyclone_arnab", label: "🌀 Cyclone Arnab",  cls: "bg-cyan-100   text-cyan-700"   },
-                  { key: "hurricane_isaias",label:"🌀 Hurricane Isaias",cls:"bg-cyan-100  text-cyan-700"   },
-                  { key: "panama_quake",  label: "🌍 Panama Quake",   cls: "bg-yellow-100 text-yellow-700" },
-                  { key: "tibet_quake",   label: "🌍 Tibet Quake",    cls: "bg-yellow-100 text-yellow-700" },
-                  { key: "kilauea",       label: "🌋 Kilauea",        cls: "bg-orange-100 text-orange-700" },
-                  { key: "india_bloc",    label: "🇮🇳 INDIA Bloc",   cls: "bg-orange-100 text-orange-700" },
-                  { key: "iran_oil",      label: "🌍 Oil/Hormuz",     cls: "bg-blue-100   text-blue-700"   },
-                  { key: "binance_hack",  label: "🌍 Binance Hack",   cls: "bg-purple-100 text-purple-700" },
-                  { key: "fed_rates",     label: "🌍 Fed Rates",      cls: "bg-green-100  text-green-700"  },
+                  { key: "fake",          label: "⚠ Fake",           cls: "bg-red-100    text-red-700"    },
+                  { key: "fake_cyclone",  label: "⚠ Fake Cyclone",   cls: "bg-red-100    text-red-700"    },
+                  { key: "cyclone_arnab", label: "🌀 Cyclone Arnab", cls: "bg-cyan-100   text-cyan-700"   },
+                  { key: "tibet_quake",   label: "🌍 Tibet Quake",   cls: "bg-yellow-100 text-yellow-700" },
+                  { key: "panama_quake",  label: "🌍 Panama Quake",  cls: "bg-yellow-100 text-yellow-700" },
+                  { key: "india_bloc",    label: "🇮🇳 INDIA Bloc",  cls: "bg-orange-100 text-orange-700" },
+                  { key: "iran_oil",      label: "🌍 Oil/Hormuz",    cls: "bg-blue-100   text-blue-700"   },
                 ].map(({ key, label, cls }) => (
                   <button key={key} onClick={() => loadSample(key)}
                     className={`text-xs ${cls} font-semibold px-2 py-1 rounded hover:opacity-80 transition`}>
@@ -527,9 +521,6 @@ function App() {
                 <h3 className={`text-3xl font-black ${result.prediction === "FAKE" ? "text-red-700" : "text-green-700"}`}>
                   {result.prediction === "FAKE" ? "LIKELY FAKE NEWS" : "LIKELY REAL NEWS"}
                 </h3>
-                <p className="text-gray-700 mt-2 font-medium">
-                  Confidence: <span className="font-bold text-gray-900">{result.confidence}</span>
-                </p>
               </div>
             )}
           </div>
