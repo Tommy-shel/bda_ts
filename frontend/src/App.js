@@ -418,13 +418,14 @@ function App() {
         t: "URGENT: Tibet earthquake was divine punishment — monk predicts magnitude 10 quake to destroy China in 30 days",
         x: "A video circulating on social media features a person claiming to be a Buddhist monk predicting that the Tibet earthquake was divine retribution and that a magnitude ten earthquake will destroy all of eastern China within thirty days. Seismologists note that magnitude ten earthquakes are near the theoretical upper physical limit and none has ever been recorded. The Chinese Earthquake Administration attributed the Nagqu event to a known tectonic fault system.",
       },
+      nepal: {
         t: "Heavy Monsoon Rains Trigger Severe Flooding in Nepal, Over 15,000 Displaced",
         x: "Torrential downpours across Kathmandu and Eastern Nepal have caused widespread devastation, prompting authorities to deploy army personnel and disaster management forces. More than 15,000 families have been evacuated to relief shelters.",
       },
       real: {
         t: "Senate passes bipartisan infrastructure bill",
         x: "The Senate today voted in favor of a major infrastructure package, marking a rare moment of bipartisan cooperation. This bill will fund critical upgrades to roads and bridges.",
-      },
+      }
     };
     const s = samples[type] || samples.real;
     setTitle(s.t); setText(s.x);
